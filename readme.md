@@ -4,7 +4,7 @@ Gesture controlled game for tetraplegics
 
 MIT.
 
-## lploc.js
+## Used technologies
 
 Using pico.js and Iploc.js
 
