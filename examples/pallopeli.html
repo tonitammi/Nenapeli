@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="chrome=1">
+		<title>Using pico.js and lploc.js for real-time localization of eye pupils</title>
+		<script src="camvas.js"></script>
+		<script src="../pico.js"></script>
+		<script src="../lploc.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+	</head>
+	<body>
+		<p><center><input type="button" value="Start" onclick="button_callback()"></center></p>
+        <p><center><span>Set speed: <span contenteditable="true" id="speed">4</span></span></center></p>
+        <p><center><canvas width=640 height=480></canvas></center></p>
+        <p><center><canvas width=640 height=480 id="gameArea"></canvas></center></p>
+
+    </body>
+    
+	<script>
+		var initialized = false;
+        var ballX = 367.5, ballY = 438;
+        var speed = 4;
+        var bx = speed, by = -speed;
+        const ballRadius = 12;
+		var boardX = 330, boardY = 450, boardWidth = 200;   
+        var angleDeg;
+
+		var ping = new sound("ping2.mp3");
+        var winSound = new sound("fart.mp3");
+        
+        var ctx = document.getElementsByTagName('canvas')[0].getContext("2d");
+        var ctx2 = document.getElementById("gameArea").getContext("2d");
+        var can = document.getElementsByTagName('canvas')[0].style.display = "none";
+        var can2 = document.getElementById("gameArea");
+
+        function drawBall(){
+
+            ctx2.beginPath();
+            ctx2.arc(ballX, ballY, ballRadius, 0, 2*Math.PI, false);
+            ctx2.fillStyle = "#00000";
+            ctx2.fill();
+            ctx2.closePath();
+        }
+
+        function drawBoard(){
+
+            ctx2.beginPath();
+            ctx2.fillRect(boardX, can2.height-14, boardWidth, 14);
+            ctx2.lineWidth = 6;
+            ctx2.fillStyle = "#00000";
+            ctx2.fill();
+        }
+
+		function sound(src) {
+
+			this.sound = document.createElement("audio");
+			this.sound.src = src;
+			this.sound.setAttribute("preload", "auto");
+			this.sound.setAttribute("controls", "none");
+			this.sound.style.display = "none";
+			document.body.appendChild(this.sound);
+			this.play = function(){
+				this.sound.play();
+			}
+			this.stop = function(){
+				this.sound.pause();
+			}
+		}
+
+		function button_callback() {
+
+			if(initialized){
+                return;
+            }
+
+			var update_memory = pico.instantiate_detection_memory(5); // we will use the detecions of the last 5 frames
+			var facefinder_classify_region = function(r, c, s, pixels, ldim) {return -1.0;};
+			var cascadeurl = 'https://raw.githubusercontent.com/nenadmarkus/pico/c2e81f9d23cc11d1a612fd21e4f9de0921a5d0d9/rnt/cascades/facefinder';
+			fetch(cascadeurl).then(function(response) {
+				response.arrayBuffer().then(function(buffer) {
+					var bytes = new Int8Array(buffer);
+					facefinder_classify_region = pico.unpack_cascade(bytes);
+					console.log('* facefinder loaded');
+				})
+			})
+
+			var do_puploc = function(r, c, s, nperturbs, pixels, nrows, ncols, ldim) {return [-1.0, -1.0];};
+			//var puplocurl = '../puploc.bin';
+			var puplocurl = 'https://f002.backblazeb2.com/file/tehnokv-www/posts/puploc-with-trees/demo/puploc.bin'
+			fetch(puplocurl).then(function(response) {
+				response.arrayBuffer().then(function(buffer) {
+					var bytes = new Int8Array(buffer);
+					do_puploc = lploc.unpack_localizer(bytes);
+					console.log('* puploc loaded');
+				})
+			})
+
+			function rgba_to_grayscale(rgba, nrows, ncols) {
+				var gray = new Uint8Array(nrows*ncols);
+				for(var i = 0; i < nrows; i++){
+					for(var j = 0; j < ncols; j++){
+						// gray = 0.2*red + 0.7*green + 0.1*blue
+                        gray[i * ncols + j] = 
+                        (2*rgba[i*4*ncols+4*j+0]+7*rgba[i*4*ncols+4*j+1]+1*rgba[i*4*ncols+4*j+2])/10;
+                    }
+                }
+				return gray;
+			}
+		
+			var processfn = function(video, dt) {
+
+				ctx.drawImage(video, 0, 0);
+				var rgba = ctx.getImageData(0, 0, 640, 480).data;
+				// prepare input to `run_cascade`
+				image = {
+					"pixels": rgba_to_grayscale(rgba, 480, 640),
+					"nrows": 480,
+					"ncols": 640,
+					"ldim": 640
+				}
+				params = {
+					"shiftfactor": 0.1, // move the detection window by 10% of its size
+					"minsize": 100,     // minimum size of a face
+					"maxsize": 1000,    // maximum size of a face
+					"scalefactor": 1.1  // for multiscale processing: resize the detection window by 10% when moving to the higher scale
+				}
+				// run the cascade over the frame and cluster the obtained detections
+				// dets is an array that contains (r, c, s, q) quadruplets
+				// (representing row, column, scale and detection score)
+				dets = pico.run_cascade(image, facefinder_classify_region, params);
+				dets = update_memory(dets);
+				dets = pico.cluster_detections(dets, 0.2); // set IoU threshold to 0.2
+
+				// draw detections
+				for(i=0; i<dets.length; ++i){
+					// check the detection score
+					// if it's above the threshold, draw it
+                    // (the constant 50.0 is empirical: other cascades might require a different one)
+
+					if(dets[i][3]>40.0)
+					{
+                        ctx2.clearRect(0, 0, can2.width, can2.height);
+
+                        var r, c, s, r2, c2, s2, c3;
+
+                        drawBall();
+                        drawBoard();
+
+                        if(ballX + bx > can2.width-ballRadius || ballX + bx < ballRadius) {
+                            bx = -bx;
+                        }
+                        if(ballY + by < ballRadius) {
+                            by = -by;
+                        }
+                        else if(ballY + by > can2.height-ballRadius - 11){
+
+                            if(ballX > boardX && ballX < boardX + boardWidth) {
+                                by = -by;
+                            }
+                            else {
+                                alert("GAME OVER");
+                                document.location.reload();
+                            }
+                        }
+                        
+                        ballX += bx;
+                        ballY += by;
+
+                        //silmä 1
+						r = dets[i][0] - 0.075*dets[i][2];
+						c = dets[i][1] - 0.175*dets[i][2];
+						s = 0.35*dets[i][2];
+                        [r, c] = do_puploc(r, c, s, 63, image)
+                        
+                        //silmä2
+                        r2 = dets[i][0] - 0.075*dets[i][2];
+						c2 = dets[i][1] + 0.175*dets[i][2];
+						s2 = 0.35*dets[i][2];
+						[r2, c2] = do_puploc(r2, c2, s2, 63, image)
+
+                        angleDeg = Math.atan2(r2 - r, c2 - c) * 180 / Math.PI;
+                        
+						if(angleDeg < -4){
+
+							// if(boardX >= 0){
+							// 	boardX = boardX - 7;
+                            // }
+                            if(boardX <= 640 - boardWidth){
+								boardX = boardX + 7;
+							}
+						}
+						else if(angleDeg > 4) {
+                            
+							if(boardX >= 0){
+								boardX = boardX - 7;
+                            }
+
+							// if(boardX <= 640 - boardWidth){
+							// 	boardX = boardX + 7;
+							// }
+						}
+					}
+				}
+			}
+			/*
+				(5) instantiate camera handling (see https://github.com/cbrandolino/camvas)
+			*/
+			var mycamvas = new camvas(ctx, processfn);
+			/*
+				(6) it seems that everything went well
+			*/
+				initialized = true;
+		}
+	
+	</script>
+</html>
