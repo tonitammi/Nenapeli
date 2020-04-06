@@ -1,0 +1,87 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+        <style>
+            
+            .kuponki{
+                border: 1pc solid black;
+                width: 25rem;
+                height: 10rem;
+                transform: translateX(-50%) translateY(-50%);
+                top: 50%;
+                left: 50%;
+                text-align: center;
+                position: absolute;
+            }
+        </style>
+    </head>
+    <body>
+        <center>
+            <p contenteditable="true" id="steps">0</p>
+
+            <button class="lunastus-btn" value="10000">Lunasta (10000)</button>
+            <button class="lunastus-btn" value="20000">Lunasta (20000)</button>
+            <button class="lunastus-btn" value="30000">Lunasta (30000)</button>
+            <button class="lunastus-btn" value="40000">Lunasta (40000)</button>
+        </center>
+    </body>
+    <script>
+
+        obj = {
+            value: 10000,
+            price: "10% alennus Kikkelikauppaan"
+        };
+
+        (function(){
+
+            let buttons = document.getElementsByClassName("lunastus-btn");
+
+            for(let i = 0; i < buttons.length; i++){
+                
+                buttons[i].addEventListener("click", function(e){
+
+                    let val = e.target.value;                   
+                    lunasta(val);
+                })
+            }
+        })();
+
+        function lunasta(a){
+            
+            if(tarkista(a)){
+                alert("Lunastaminen onnistui");
+                let d = document.createElement("div");
+                d.classList.add("kuponki");
+                d.innerHTML = a + "<br>" + obj.price;
+
+                let btn = document.createElement("button");
+                btn.innerHTML = "Sulje";
+                btn.addEventListener("click", function(e){
+                    let element = e.target.parentElement;
+                    element.parentNode.removeChild(element);
+                })
+
+                d.appendChild(btn);
+                document.body.appendChild(d);
+            }
+            else{
+                alert("Askeleesi ei riittänyt kupongin lunastamiseen");
+            }
+        }
+
+        function tarkista(a){
+
+            let steps = Number(document.getElementById("steps").innerHTML);
+            
+            if(steps >= a){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+
+    </script>
+</html>
