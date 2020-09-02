@@ -1,0 +1,304 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        *,
+        *::after,
+        *::before {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 14px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            width: 100%;
+            height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        #canvas {
+
+            height: 100vh;
+            width: 100%;
+            background-color: aqua;
+        }
+
+        video {
+            visibility: hidden;
+            height: 400px;
+            width: 600px;
+        }
+
+        #test {
+            width: 5rem;
+            height: 1rem;
+            background-color: red;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            transition: .1s;
+        }
+
+        .robo {
+            position: absolute;
+            top: 10%;
+            left: 35%;
+            width: 10rem;
+            border: 2px solid #000;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <canvas id="canvas"></canvas>
+    <video id="video"></video>
+    <button id="stop">Stop</button>'
+
+
+
+    <!-- faceapi aina ennen gesturea -->
+    <script src="face-api/dist/face-api.min.js"></script>
+    <!-- gesture taas aina ennen sen käyttöä -->
+    <script src="gesture.js"></script>
+    <script>
+        const canvas = document.getElementById("canvas");
+        const video = document.getElementById("video");
+
+        const ctx = canvas.getContext("2d");
+
+        // konstruktorin parameterit tyyppeineen: canvas (html-elementti), video (html-elementti)
+        // treshold (number, joka kuvaa pienintä kulman muutosta pään horisontaalisessa asennossa, 
+        // joka laukaisee controllerin. Default arvo 10) ja eventlisteners (default = false). Jälkimmäisellä ei mitään
+        // virkaa vielä. Eli ainoastaan canvas ja video elementit on pakollisia parametreja
+        const gestureController = new GestureController(canvas, video);
+
+        // start-metodi, joka alustaa webcameran streamin video-elementtiin
+        // ja aloittaa kasvojentunnistuksen.
+        gestureController.start();
+
+
+        document.getElementById("stop").addEventListener("click", function () {
+            // tällä pysäytetään kasvojen tunnistus (webcam streami ei pysähdy)
+            gestureController.stop();
+        });
+
+        // ilmoittaa eventillä, kun kaikki tilpehöörit on ladattuna ja controlleri alkaa
+        // ulostaa dataa
+        document.addEventListener("controllerloaded", function () {
+            console.log("gesture controlleri valmiina käytettäväksi");
+        });
+
+        setInterval(() => {
+
+            // getteri vertikaaliselle liikkeelle. 1: ylös, 0: paikallaan, -1: alas
+            // "laukeaa" virheellisesti (eli liian aikaisin), mikäli päätä kallistetaan samalla
+            // sivuttais suunnassa
+            const vertical = gestureController.vertical;
+            // getteri horisontaaliselle liikkeelle. 1: vasen, 0: paikallaan, -1: oikealle
+            const horizontal = gestureController.horizontal;
+            // ilmaisee pään horsontaalisen kallistuskulman asteina.
+            const degree = gestureController.degree;
+
+            //console logit jos tykkäät tuijotella
+            // console.log("vertivcal: " + vertical);
+            // console.log("horizontal: " + horizontal);
+            // console.log("degree: " + degree);
+
+        }, 100);
+
+        var score = 0;
+
+        const brick = {
+            x: 0,
+            y: 0,
+            width: 14,
+            height: 7,
+            rowCount: 15,
+            columnCount: 5,
+            color: "#ffff00",
+            padding: 3,
+            offsetLeft: 25,
+            offsetTop: 10,
+
+
+        }
+
+        const paddle = {
+            x: 75,
+            y: 140,
+            width: 50,
+            height: 5,
+            color: "#ffff00",
+            speed: 5
+        }
+
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 4,
+            velocityX: 5,
+            velocityY: 5,
+
+            speedX: 1,
+            speedY: -1,
+            color: "WHITE"
+        }
+
+
+
+        function drawScore() {
+            ctx.font = "8px Comic Sans";
+            ctx.fillStyle = "WHITE";
+            ctx.fillText("Score: " + score, 1, 7)
+        }
+
+
+        function movePaddle() {
+            if (gestureController.horizontal > 0) {
+                paddle.x -= paddle.speed;
+            }
+            if (gestureController.horizontal < 0) {
+                paddle.x += paddle.speed;
+            }
+            if (paddle.x >= canvas.width - paddle.width) {
+                paddle.x = canvas.width - paddle.width;
+            }
+            if (paddle.x <= 0) {
+                paddle.x = 0;
+            }
+        }
+
+
+        function drawRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, w, h);
+        }
+
+        function drawArc(x, y, r, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+
+
+
+
+        const bricks = [];
+        for (var c = 0; c < brick.columnCount; c++) {
+            bricks[c] = [];
+            for (var r = 0; r < brick.rowCount; r++) {
+                bricks[c][r] = {
+                    x: 0,
+                    y: 0,
+                    status: 1
+                };
+            }
+        }
+
+
+
+        function collisionDetection() {
+            for (var c = 0; c < brick.columnCount; c++) {
+                for (var r = 0; r < brick.rowCount; r++) {
+                    var b = bricks[c][r];
+                    if (b.status == 1) {
+                        if (ball.x > b.x && ball.x < b.x + brick.width && ball.y > b.y && ball.y < b.y + brick.height) {
+                            ball.speedY = -ball.speedY;
+                            b.status = 0;
+                            score++;
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+
+        function drawBricks() {
+            for (let c = 0; c < brick.columnCount; c++) {
+                for (let r = 0; r < brick.rowCount; r++) {
+                    if (bricks[c][r].status == 1) {
+                        let brickX = (r * (brick.width + brick.padding)) + brick.offsetLeft;
+                        let brickY = (c * (brick.height + brick.padding)) + brick.offsetTop;
+                        bricks[c][r].x = brickX;
+                        bricks[c][r].y = brickY;
+                        ctx.beginPath();
+                        ctx.rect(brickX, brickY, brick.width, brick.height);
+                        ctx.stroke();
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = "#2A2D34";
+                        ctx.fillStyle = "#F5B700";
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                }
+            }
+        }
+
+    
+        function render() {
+
+            drawRect(0, 0, canvas.width, canvas.height, "#000");
+
+
+
+            collisionDetection()
+            drawBricks();
+            drawArc(ball.x, ball.y, ball.radius, ball.color);
+            drawRect(paddle.x, paddle.y, paddle.width, paddle.height, paddle.color);
+            movePaddle();
+            drawScore();
+
+
+            if (ball.x + ball.speedX > canvas.width - ball.radius || ball.x + ball.speedX < ball.radius) {
+
+                ball.speedX = -ball.speedX;
+            }
+            if (ball.y + ball.speedY < ball.radius) {
+
+                ball.speedY = -ball.speedY;
+
+            } else if (ball.y + ball.speedY > canvas.height - ball.radius) {
+
+                if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
+                    ball.speedY = -ball.speedY;
+
+
+                } else {
+                    console.log("GAME OVER")
+                    clearInterval(loop)
+
+                }
+            }
+            ball.x += ball.speedX;
+            ball.y += ball.speedY;
+
+        }
+        function game() {
+            render()
+
+        }
+        let fps = 30;
+        let loop = setInterval(game, 1000 / fps)
+
+    </script>
+</body>
+
+</html>
