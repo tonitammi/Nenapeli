@@ -129,8 +129,6 @@
             padding: 3,
             offsetLeft: 25,
             offsetTop: 10,
-
-
         }
 
         const paddle = {
@@ -162,7 +160,6 @@
             ctx.fillText("Score: " + score, 1, 7)
         }
 
-
         function movePaddle() {
             if (gestureController.horizontal > 0) {
                 paddle.x -= paddle.speed;
@@ -178,7 +175,6 @@
             }
         }
 
-
         function drawRect(x, y, w, h, color) {
             ctx.fillStyle = color;
             ctx.fillRect(x, y, w, h);
@@ -192,10 +188,6 @@
             ctx.fill();
         }
 
-
-
-
-
         const bricks = [];
         for (var c = 0; c < brick.columnCount; c++) {
             bricks[c] = [];
@@ -207,8 +199,6 @@
                 };
             }
         }
-
-
 
         function collisionDetection() {
             for (var c = 0; c < brick.columnCount; c++) {
@@ -224,12 +214,6 @@
                 }
             }
         }
-
-
-
-
-
-
 
         function drawBricks() {
             for (let c = 0; c < brick.columnCount; c++) {
@@ -256,8 +240,6 @@
         function render() {
 
             drawRect(0, 0, canvas.width, canvas.height, "#000");
-
-
 
             collisionDetection()
             drawBricks();
@@ -292,8 +274,8 @@
 
         }
         function game() {
-            render()
-
+            render();
+            console.log(gestureController.horizontal);
         }
         let fps = 30;
         let loop = setInterval(game, 1000 / fps)
