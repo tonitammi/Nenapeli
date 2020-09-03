@@ -24,10 +24,8 @@
         }
 
         #canvas {
-
             height: 100vh;
             width: 100%;
-            background-color: aqua;
         }
 
         video {
@@ -73,7 +71,6 @@
     <script>
         const canvas = document.getElementById("canvas");
         const video = document.getElementById("video");
-
         const ctx = canvas.getContext("2d");
 
         // konstruktorin parameterit tyyppeineen: canvas (html-elementti), video (html-elementti)
@@ -87,36 +84,23 @@
         gestureController.start();
 
 
-        document.getElementById("stop").addEventListener("click", function () {
-            // tällä pysäytetään kasvojen tunnistus (webcam streami ei pysähdy)
-            gestureController.stop();
-        });
+        // document.getElementById("stop").addEventListener("click", function () {
+        //     gestureController.stop();
+        // });
 
         // ilmoittaa eventillä, kun kaikki tilpehöörit on ladattuna ja controlleri alkaa
         // ulostaa dataa
-        document.addEventListener("controllerloaded", function () {
-            console.log("gesture controlleri valmiina käytettäväksi");
+        // document.addEventListener("controllerloaded", function () {
+        //     console.log("gesture controlleri valmiina käytettäväksi");
+        // });
+
+        let score = 0;
+        let fps = 30;
+        let loop; 
+
+        document.addEventListener("controllerloaded", function() {
+            loop = setInterval(game, 1000 / fps)
         });
-
-        setInterval(() => {
-
-            // getteri vertikaaliselle liikkeelle. 1: ylös, 0: paikallaan, -1: alas
-            // "laukeaa" virheellisesti (eli liian aikaisin), mikäli päätä kallistetaan samalla
-            // sivuttais suunnassa
-            const vertical = gestureController.vertical;
-            // getteri horisontaaliselle liikkeelle. 1: vasen, 0: paikallaan, -1: oikealle
-            const horizontal = gestureController.horizontal;
-            // ilmaisee pään horsontaalisen kallistuskulman asteina.
-            const degree = gestureController.degree;
-
-            //console logit jos tykkäät tuijotella
-            // console.log("vertivcal: " + vertical);
-            // console.log("horizontal: " + horizontal);
-            // console.log("degree: " + degree);
-
-        }, 100);
-
-        var score = 0;
 
         const brick = {
             x: 0,
@@ -241,7 +225,7 @@
 
             drawRect(0, 0, canvas.width, canvas.height, "#000");
 
-            collisionDetection()
+            collisionDetection();
             drawBricks();
             drawArc(ball.x, ball.y, ball.radius, ball.color);
             drawRect(paddle.x, paddle.y, paddle.width, paddle.height, paddle.color);
@@ -250,23 +234,19 @@
 
 
             if (ball.x + ball.speedX > canvas.width - ball.radius || ball.x + ball.speedX < ball.radius) {
-
                 ball.speedX = -ball.speedX;
             }
             if (ball.y + ball.speedY < ball.radius) {
-
                 ball.speedY = -ball.speedY;
-
-            } else if (ball.y + ball.speedY > canvas.height - ball.radius) {
+            } 
+            else if (ball.y + ball.speedY > canvas.height - ball.radius - 10) {
 
                 if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
                     ball.speedY = -ball.speedY;
 
-
                 } else {
                     console.log("GAME OVER")
                     clearInterval(loop)
-
                 }
             }
             ball.x += ball.speedX;
@@ -277,8 +257,6 @@
             render();
             console.log(gestureController.horizontal);
         }
-        let fps = 30;
-        let loop = setInterval(game, 1000 / fps)
 
     </script>
 </body>
