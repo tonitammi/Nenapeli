@@ -5,9 +5,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <style>
-        *,
-        *::after,
-        *::before {
+        *, *::after, *::before {
             box-sizing: border-box;
         }
 
@@ -21,10 +19,19 @@
             height: 100vh;
             padding: 0;
             margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
-        #canvas {
+        .container {
             height: 100vh;
+            width: 100%;       
+            text-align: center;    
+        }
+        #start-menu {
+            top: 4rem;
+        }
+        #canvas {
+            height: 100%;
             width: 100%;
         }
 
@@ -45,20 +52,22 @@
             transition: .1s;
         }
 
-        .robo {
-            position: absolute;
-            top: 10%;
-            left: 35%;
-            width: 10rem;
-            border: 2px solid #000;
-        }
     </style>
 </head>
 
 <body>
 
 
-    <canvas id="canvas"></canvas>
+    <div class="container">
+        <div id="start-menu">
+            <h2>Open your mouth two times to start a game</h2>
+            <h2 id="display">0</h2>
+        </div>
+        <div>
+            <h2 id="scores"></h2>
+        </div>
+        <canvas id="canvas" style="display: none;"></canvas>   
+    </div>
     <video id="video"></video>
     <button id="stop">Stop</button>'
 
@@ -72,12 +81,16 @@
         const canvas = document.getElementById("canvas");
         const video = document.getElementById("video");
         const ctx = canvas.getContext("2d");
+        const menu = document.getElementById("start-menu");
+        const display = document.getElementById("display");
+        let times = 0, interval;
+
 
         // konstruktorin parameterit tyyppeineen: canvas (html-elementti), video (html-elementti)
         // treshold (number, joka kuvaa pienintä kulman muutosta pään horisontaalisessa asennossa, 
         // joka laukaisee controllerin. Default arvo 10) ja eventlisteners (default = false). Jälkimmäisellä ei mitään
         // virkaa vielä. Eli ainoastaan canvas ja video elementit on pakollisia parametreja
-        const gestureController = new GestureController(canvas, video);
+        const gestureController = new GestureController(canvas, video, 10);
 
         // start-metodi, joka alustaa webcameran streamin video-elementtiin
         // ja aloittaa kasvojentunnistuksen.
@@ -90,72 +103,127 @@
 
         // ilmoittaa eventillä, kun kaikki tilpehöörit on ladattuna ja controlleri alkaa
         // ulostaa dataa
-        // document.addEventListener("controllerloaded", function () {
-        //     console.log("gesture controlleri valmiina käytettäväksi");
-        // });
-
-        let score = 0;
-        let fps = 30;
-        let loop; 
-
         document.addEventListener("controllerloaded", function() {
-            loop = setInterval(game, 1000 / fps)
+            
+            game.init();
+
+            interval = setInterval(() => {
+                checkMouthOpens();
+            }, 800);
         });
 
-        const brick = {
-            x: 0,
-            y: 0,
-            width: 14,
-            height: 7,
-            rowCount: 15,
-            columnCount: 5,
-            color: "#ffff00",
-            padding: 3,
-            offsetLeft: 25,
-            offsetTop: 10,
+        const checkMouthOpens = () => {
+            display.textContent = times;
+            if(gestureController.mouthOpen) {
+                times += 1;
+                display.textContent = times;
+            }
+            if(times == 2) {
+                clearInterval(interval);
+                display.textContent = "Game starting..";
+                setTimeout(() => {
+                    menu.style.display = "none";
+                    game.start();
+                    times = 0;
+                    display.textContent = 0;
+                }, 2000);
+            }
         }
 
-        const paddle = {
-            x: 75,
-            y: 140,
-            width: 50,
-            height: 5,
-            color: "#ffff00",
-            speed: 5
+        const game = {
+            score: 0,
+            fps: 30,
+            bricks: [],
+            start: function() {
+                document.getElementById("scores").textContent = "";
+                canvas.style.display = "block";
+                this.gameLoop = setInterval(() => render(), 1000 / this.fps);
+            },
+            pause: function() {
+                clearInterval(this.gameLoop)
+            },
+            gameover: function() {
+                canvas.style.display = "none";
+                menu.style.display = "block";
+                clearInterval(this.gameLoop);
+                document.getElementById("scores").textContent = `You got ${this.score} points!`;
+                this.init();
+                interval = setInterval(() => {
+                    checkMouthOpens();
+                }, 800);
+            },
+            init: function() {
+                console.log("init");
+                this.score = 0;
+                
+                this.brick = {
+                    x: 0,
+                    y: 0,
+                    width: 14,
+                    height: 7,
+                    rowCount: 15,
+                    columnCount: 5,
+                    color: "#ffff00",
+                    padding: 3,
+                    offsetLeft: 25,
+                    offsetTop: 10,
+                }
+
+                this.paddle = {
+                    x: 75,
+                    y: 140,
+                    width: 50,
+                    height: 5,
+                    color: "#ffff00",
+                    speed: 4
+                }
+
+                this.ball = {
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    radius: 4,
+                    velocityX: 5,
+                    velocityY: 5,
+                    speedX: 1,
+                    speedY: -1,
+                    color: "WHITE"
+                }
+                for (let c = 0; c < this.brick.columnCount; c++) {
+                    this.bricks[c] = [];
+                    for (let r = 0; r < this.brick.rowCount; r++) {
+                        this.bricks[c][r] = {
+                            x: 0,
+                            y: 0,
+                            status: 1
+                        };
+                    }
+                }
+            }
         }
-
-        const ball = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            radius: 4,
-            velocityX: 5,
-            velocityY: 5,
-
-            speedX: 1,
-            speedY: -1,
-            color: "WHITE"
+        function drawText(text) {
+            ctx.font = "16px Comic Sans";
+            ctx.fillStyle = "WHITE";
+            ctx.fillText(text, 250, 200);
         }
-
-
 
         function drawScore() {
             ctx.font = "8px Comic Sans";
             ctx.fillStyle = "WHITE";
-            ctx.fillText("Score: " + score, 1, 7)
+            ctx.fillText("Score: " + game.score, 1, 7)
         }
 
         function movePaddle() {
             if (gestureController.horizontal > 0) {
-                paddle.x -= paddle.speed;
+                game.paddle.x -= game.paddle.speed;
             }
             if (gestureController.horizontal < 0) {
-                paddle.x += paddle.speed;
+                game.paddle.x += game.paddle.speed;
             }
-            if (paddle.x >= canvas.width - paddle.width) {
-                paddle.x = canvas.width - paddle.width;
+            if (game.paddle.x >= canvas.width - game.paddle.width) {
+                game.paddle.x = canvas.width - game.paddle.width;
             }
-            if (paddle.x <= 0) {
-                paddle.x = 0;
+            if (game.paddle.x <= 0) {
+                game.paddle.x = 0;
             }
         }
 
@@ -172,27 +240,15 @@
             ctx.fill();
         }
 
-        const bricks = [];
-        for (var c = 0; c < brick.columnCount; c++) {
-            bricks[c] = [];
-            for (var r = 0; r < brick.rowCount; r++) {
-                bricks[c][r] = {
-                    x: 0,
-                    y: 0,
-                    status: 1
-                };
-            }
-        }
-
         function collisionDetection() {
-            for (var c = 0; c < brick.columnCount; c++) {
-                for (var r = 0; r < brick.rowCount; r++) {
-                    var b = bricks[c][r];
+            for (let c = 0; c < game.brick.columnCount; c++) {
+                for (let r = 0; r < game.brick.rowCount; r++) {
+                    let b = game.bricks[c][r];
                     if (b.status == 1) {
-                        if (ball.x > b.x && ball.x < b.x + brick.width && ball.y > b.y && ball.y < b.y + brick.height) {
-                            ball.speedY = -ball.speedY;
+                        if (game.ball.x > b.x && game.ball.x < b.x + game.brick.width && game.ball.y > b.y && game.ball.y < b.y + game.brick.height + 10) {
+                            game.ball.speedY = -game.ball.speedY;
                             b.status = 0;
-                            score++;
+                            game.score++;
                         }
                     }
                 }
@@ -200,15 +256,15 @@
         }
 
         function drawBricks() {
-            for (let c = 0; c < brick.columnCount; c++) {
-                for (let r = 0; r < brick.rowCount; r++) {
-                    if (bricks[c][r].status == 1) {
-                        let brickX = (r * (brick.width + brick.padding)) + brick.offsetLeft;
-                        let brickY = (c * (brick.height + brick.padding)) + brick.offsetTop;
-                        bricks[c][r].x = brickX;
-                        bricks[c][r].y = brickY;
+            for (let c = 0; c < game.brick.columnCount; c++) {
+                for (let r = 0; r < game.brick.rowCount; r++) {
+                    if (game.bricks[c][r].status == 1) {
+                        let brickX = (r * (game.brick.width + game.brick.padding)) + game.brick.offsetLeft;
+                        let brickY = (c * (game.brick.height + game.brick.padding)) + game.brick.offsetTop;
+                        game.bricks[c][r].x = brickX;
+                        game.bricks[c][r].y = brickY;
                         ctx.beginPath();
-                        ctx.rect(brickX, brickY, brick.width, brick.height);
+                        ctx.rect(brickX, brickY, game.brick.width, game.brick.height);
                         ctx.stroke();
                         ctx.shadowBlur = 10;
                         ctx.shadowColor = "#2A2D34";
@@ -219,7 +275,6 @@
                 }
             }
         }
-
     
         function render() {
 
@@ -227,36 +282,31 @@
 
             collisionDetection();
             drawBricks();
-            drawArc(ball.x, ball.y, ball.radius, ball.color);
-            drawRect(paddle.x, paddle.y, paddle.width, paddle.height, paddle.color);
+            drawArc(game.ball.x, game.ball.y, game.ball.radius, game.ball.color);
+            drawRect(game.paddle.x, game.paddle.y, game.paddle.width, game.paddle.height, game.paddle.color);
             movePaddle();
             drawScore();
 
 
-            if (ball.x + ball.speedX > canvas.width - ball.radius || ball.x + ball.speedX < ball.radius) {
-                ball.speedX = -ball.speedX;
+            if (game.ball.x + game.ball.speedX > canvas.width - game.ball.radius || game.ball.x + game.ball.speedX < game.ball.radius) {
+                game.ball.speedX = -game.ball.speedX;
             }
-            if (ball.y + ball.speedY < ball.radius) {
-                ball.speedY = -ball.speedY;
+            if (game.ball.y + game.ball.speedY < game.ball.radius) {
+                game.ball.speedY = -game.ball.speedY;
             } 
-            else if (ball.y + ball.speedY > canvas.height - ball.radius - 10) {
-
-                if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
-                    ball.speedY = -ball.speedY;
-
-                } else {
-                    console.log("GAME OVER")
-                    clearInterval(loop)
-                }
+            if (game.ball.y + game.ball.speedY > canvas.height - game.ball.radius - 10) {
+                if (game.ball.x > game.paddle.x && game.ball.x < game.paddle.x + game.paddle.width) {
+                    game.ball.speedY = -game.ball.speedY;
+                } 
             }
-            ball.x += ball.speedX;
-            ball.y += ball.speedY;
+            if (game.ball.y + game.ball.speedY > canvas.height - game.ball.radius) {
+                game.gameover();
+            }
 
+            game.ball.x += game.ball.speedX;
+            game.ball.y += game.ball.speedY;
         }
-        function game() {
-            render();
-            console.log(gestureController.horizontal);
-        }
+
 
     </script>
 </body>

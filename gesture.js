@@ -1,6 +1,6 @@
 class GestureController {
 
-    constructor(canvas, video, threshold = 2, eventlisteners = false) {
+    constructor(canvas, video, threshold = 10, eventlisteners = false) {
         this.canvas = canvas;
         this.video = video;
         this.video_w = video.clientWidth;
@@ -8,6 +8,7 @@ class GestureController {
         this.threshold = threshold;
         this._degree = 0;
         this._vertical = 0;
+        this._mouthOpen = false;
 
         if(eventlisteners) {
             this.emitEvents();
@@ -32,6 +33,10 @@ class GestureController {
 
     get degree() {
         return -this._degree;
+    }
+
+    get mouthOpen() {
+        return this._mouthOpen;
     }
 
     start() {
@@ -64,6 +69,14 @@ class GestureController {
                 const height2 = resizedDetections.landmarks._positions[9]._y - resizedDetections.landmarks._positions[34]._y 
                 const heightRatio = height / height2;
                 
+                const mouthratio = (resizedDetections.landmarks._positions[67]._y 
+                                    - resizedDetections.landmarks._positions[63]._y) / (resizedDetections.landmarks._positions[52]._y - resizedDetections.landmarks._positions[34]._y)
+                if(mouthratio > 1.2) {
+                    this._mouthOpen = true;
+                }
+                else {
+                    this._mouthOpen = false;
+                }
                 if(heightRatio < 0.75) {
                     this._vertical = 1;
                 }
