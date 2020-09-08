@@ -15,7 +15,7 @@ Get canvas and video element
       const canvas = document.getElementById("canvas");
    
 
-Create a new gesture contrtoller by calling constructor.
+Create a new gesture controller by calling constructor.
   
       const gestureController = new GestureController(video, canvas)
      
