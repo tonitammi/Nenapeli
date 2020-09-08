@@ -9,13 +9,36 @@ Watch [demo](nenapeli-b7576.web.app).
 Download gesture-controller.js or install with npm:
 
         npm install gesture-controller
+        
+Create incredibly stylish HTML file:
+        
+        <html>
+          <head>
+            <title>Gesture controller example</title>
+            <style>
+              body {
+                width: 100%;
+                height: 100vh;
+              }
+              #canvas {
+                width: 600px;
+                height: 400px;
+                margin: 16px;
+              }
+            </style>
+          </head>
+          <body>
+            <canvas id="canvas"></canvas>
+            <video id="video" style="display: none"></video>
+          </body>
+        </html>
 
-Import face-api.js and gesture-controller.js. Face-api.js should be imported first.
+Import face-api.js and gesture-controller.js just before body end tag. Face-api.js should be imported first.
 
         <script src="face-api/dist/face-api.min.js"></script>
         <script src="gesture-controller.js"></script>
 
-Get canvas and video element
+Get canvas and video elements.
 
       const video = document.getElementById("video");
       const canvas = document.getElementById("canvas");
