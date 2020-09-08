@@ -114,7 +114,7 @@ You can stop gesture controller by calling:
             console.log("down")
         });
         gestureController.on("mouthopen", function() {
-            console.log("mouthi s open")
+            console.log("mouth is open")
         });
         gestureController.on("mouthclosed", function() {
             console.log("mouth is closed")
