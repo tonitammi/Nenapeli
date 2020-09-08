@@ -86,9 +86,9 @@ Start method will start the webcam stream, load face-api.js models and start fac
           console.log("right")
         }
         
-        const headDegree = gestureController.degree;
+        const headAngel = gestureController.degree;
         // head angle in degrees relative to webcam angle. Negative value is left, positive value is right.
-        console.log(headDegree); 
+        console.log(headAngel); 
       }, 100)
     })
     
@@ -111,7 +111,7 @@ You can stop gesture controller by calling:
 |------|-----------|----------|
 |start()|Starts a gesture controller| - |
 |stop()|Stops the gesture controller| - |
-|on(event, callback)| Listen emited events|event (string), callback (function)|
+|on(event, callback)| Listens emited events|event (string), callback (function)|
 
 <b>Properties</b>
 
