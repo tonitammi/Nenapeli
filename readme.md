@@ -99,6 +99,8 @@ You can stop gesture controller by calling:
     
 <b>Use events example</b>
 
+        const gestureController = new GestureController(video, canvas, 10, true);
+
         gestureController.on("left", function() {
             console.log("left")
         });
@@ -125,7 +127,7 @@ You can stop gesture controller by calling:
 |canvas| - | HTMLCanvasElement| - |
 |video|Video for webcam stream|HTMLVideoElement| - |
 |threshold|Controls the head angle needed to trigger <br> a horizontal movement property|Number|10|
-|use_events|Use on method to listen controls|Boolean|false|
+|use_events*|Use on method to listen controls|Boolean|false|
 
 *Important! If use_event is set to true, only the degree property can be used.
 
