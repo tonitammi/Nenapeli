@@ -121,9 +121,9 @@ You can stop gesture controller by calling
 |mouthOpen|Returns true if mouth open, else false|Boolean|
 |vertical|Returns vertical controls (1: up, 0: none, -1: down)|Number|
 
-<b>Known problems</b>
+<b>Known issues</b>
 
-Vertical property is triggered incorrectly when head angle is between 12 - 20 or -12 - -20 degrees.
+Vertical property is triggered incorrectly when head angle is something over 12 - 20 degrees in both directions.
 
 ## License
 
