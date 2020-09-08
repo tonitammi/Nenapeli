@@ -2,7 +2,7 @@ Gesture controlled game for tetraplegics
 
 ## Gesture Controller
 
-Example:
+<b>Example:</b>
 
 Import face-api.js and gesture-controller.js. Face-api.js should be imported first.
 
@@ -68,7 +68,7 @@ You can stop gesture controller by calling
     
     gestureController.stop()
 
-Constructor parameters, methods and properties:
+<b>Constructor parameters</b>
 
 |Parameter|Description|Type|
 |---------|-----------|----|
@@ -76,10 +76,14 @@ Constructor parameters, methods and properties:
 |video|Video for webcam stream|HTMLVideoElement|
 |threshold|Controls the head angle needed to trigger a horizontal movement property|Number|
 
+<b>Methods</b>
+
 |Method|Description|
 |------|-----------|
 |start()|Starts a gesture controller|
 |stop()|Stops the gesture controller|
+
+<b>Properties</b>
 
 |Property|Description|Type|
 |--------|-----------|----|
