@@ -90,7 +90,7 @@
         // treshold (number, joka kuvaa pienintä kulman muutosta pään horisontaalisessa asennossa, 
         // joka laukaisee controllerin. Default arvo 10) ja eventlisteners (default = false). Jälkimmäisellä ei mitään
         // virkaa vielä. Eli ainoastaan canvas ja video elementit on pakollisia parametreja
-        const gestureController = new GestureController(canvas, video, 10);
+        const gestureController = new GestureController(canvas, video, 10, true);
 
         // start-metodi, joka alustaa webcameran streamin video-elementtiin
         // ja aloittaa kasvojentunnistuksen.
@@ -111,6 +111,23 @@
                 checkMouthOpens();
             }, 800);
         });
+
+        gestureController.on("left", function() {
+            console.log("left");
+        });
+        gestureController.on("right", function() {
+            console.log("right");
+        });
+        gestureController.on("up", function() {
+            console.log("up");
+        });
+        gestureController.on("down", function() {
+            console.log("down");
+        });
+        gestureController.on("mouthopen", function() {
+            console.log("mouthopen");
+        });
+
 
         const checkMouthOpens = () => {
             display.textContent = times;
