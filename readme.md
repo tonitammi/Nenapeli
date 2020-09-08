@@ -150,7 +150,7 @@ You can stop gesture controller by calling:
 
 <b>Events</b>
 
-|Event|Descripion|use_events argument is needed|
+|Event|Description|use_events argument is needed|
 |-----|----------|--------------------------|
 |"controllerloaded"|Gesture controller is loaded <br> and ready to use|no|
 |"up"|Head moves up|yes|
