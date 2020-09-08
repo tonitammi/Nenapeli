@@ -67,7 +67,27 @@ You can stop gesture controller by calling
 
     
     gestureController.stop()
-    
+
+Constructor parameters, methods and properties:
+
+|Parameter|Description|Type|
+|---------|-----------|----|
+|canvas| - | HTMLCanvasElement|
+|video|Video for webcam stream|HTMLVideoElement|
+|threshold|Controls the head angle needed to trigger a horizontal movement property|Number|
+
+|Method|Description|
+|------|-----------|
+|start()|Starts a gesture controller|
+|stop()|Stops the gesture controller|
+
+|Property|Description|Type|
+|--------|-----------|----|
+|degree|Returns relative angel of head in degrees|Number|
+|horizontal|Returns horizontal controls (1: left, 0: none, -1: right)|Number|
+|mouthOpen|Returns true if mouth open, else false|Boolean|
+|vertical|Returns vertical controls (1: up, 0: none, -1: down)|Number|
+
 
 ## License
 
