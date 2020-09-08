@@ -59,7 +59,7 @@ Start gesture controller by calling:
      gestureController.start()
  
  
-Start method will start the webcam stream, load face-api.js models and start face recognition. After that it dispatches controllerloaded event to the document. You can listen the event with eventListener and forexample, start a loop to check face movements:
+Start method will start the webcam stream, load face-api.js models and start face recognition. After that it dispatches controllerloaded event to the document. You can listen the event with eventListener and for example, start a loop to check face movements:
 
     document.addEventListener("controllerloaded", function() {
       const interval = setInterval(() => {
@@ -92,18 +92,18 @@ Start method will start the webcam stream, load face-api.js models and start fac
       }, 100)
     })
     
-You can stop gesture controller by calling
+You can stop gesture controller by calling:
 
     
     gestureController.stop()
 
 <b>Constructor parameters</b>
 
-|Parameter|Description|Type|
-|---------|-----------|----|
-|canvas| - | HTMLCanvasElement|
-|video|Video for webcam stream|HTMLVideoElement|
-|threshold|Controls the head angle needed to trigger <br> a horizontal movement property|Number|
+|Parameter|Description|Type|Default|
+|---------|-----------|----|-------|
+|canvas| - | HTMLCanvasElement| - |
+|video|Video for webcam stream|HTMLVideoElement| - |
+|threshold|Controls the head angle needed to trigger <br> a horizontal movement property|Number|10|
 
 <b>Methods</b>
 
