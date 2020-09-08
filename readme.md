@@ -103,7 +103,7 @@ You can stop gesture controller by calling
 |---------|-----------|----|
 |canvas| - | HTMLCanvasElement|
 |video|Video for webcam stream|HTMLVideoElement|
-|threshold|Controls the head angle needed to trigger a horizontal movement property|Number|
+|threshold|Controls the head angle needed to trigger <br> a horizontal movement property|Number|
 
 <b>Methods</b>
 
