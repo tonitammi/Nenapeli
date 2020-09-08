@@ -76,7 +76,7 @@
     <!-- faceapi aina ennen gesturea -->
     <script src="face-api/dist/face-api.min.js"></script>
     <!-- gesture taas aina ennen sen käyttöä -->
-    <script src="gesture.js"></script>
+    <script src="gesture-controller.js"></script>
     <script>
         const canvas = document.getElementById("canvas");
         const video = document.getElementById("video");
@@ -103,7 +103,7 @@
 
         // ilmoittaa eventillä, kun kaikki tilpehöörit on ladattuna ja controlleri alkaa
         // ulostaa dataa
-        document.addEventListener("controllerloaded", function() {
+        gestureController.on("controllerloaded", function() {
             
             game.init();
 
@@ -114,6 +114,7 @@
 
         const checkMouthOpens = () => {
             display.textContent = times;
+
             if(gestureController.mouthOpen) {
                 times += 1;
                 display.textContent = times;
@@ -285,8 +286,7 @@
             drawArc(game.ball.x, game.ball.y, game.ball.radius, game.ball.color);
             drawRect(game.paddle.x, game.paddle.y, game.paddle.width, game.paddle.height, game.paddle.color);
             movePaddle();
-            drawScore();
-
+            drawScore();            
 
             if (game.ball.x + game.ball.speedX > canvas.width - game.ball.radius || game.ball.x + game.ball.speedX < game.ball.radius) {
                 game.ball.speedX = -game.ball.speedX;
