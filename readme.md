@@ -6,7 +6,7 @@ Watch [demo](nenapeli-b7576.web.app).
 
 <b>Example:</b>
 
-Download gesture-controller.js or install with npm:
+Download gesture-controller.js or install via npm:
 
         npm install gesture-controller
         
