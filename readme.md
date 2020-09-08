@@ -86,9 +86,9 @@ Start method will start the webcam stream, load face-api.js models and start fac
           console.log("right")
         }
         
-        const headDegree = gestureController.degree;
+        const headAngel = gestureController.degree;
         // head angle in degrees relative to webcam angle. Negative value is left, positive value is right.
-        console.log(headDegree); 
+        console.log(headAngel); 
       }, 100)
     })
     
@@ -104,6 +104,9 @@ You can stop gesture controller by calling:
 |canvas| - | HTMLCanvasElement| - |
 |video|Video for webcam stream|HTMLVideoElement| - |
 |threshold|Controls the head angle needed to trigger <br> a horizontal movement property|Number|10|
+|use_events|Use on method to listen controls|Boolean|false|
+
+*Important! If use_event is set to true, only the degree property can be used.
 
 <b>Methods</b>
 
@@ -111,16 +114,28 @@ You can stop gesture controller by calling:
 |------|-----------|----------|
 |start()|Starts a gesture controller| - |
 |stop()|Stops the gesture controller| - |
-|on(event, callback)| Listen emited events|event (string), callback (function)|
+|on(event, callback)| Listens emited events|event (string), callback (function)|
 
 <b>Properties</b>
 
-|Property|Description|Type|
-|--------|-----------|----|
-|degree|Returns relative angel of head in degrees|Number|
-|horizontal|Returns horizontal controls (1: left, 0: none, -1: right)|Number|
-|mouthOpen|Returns true if mouth open, else false|Boolean|
-|vertical|Returns vertical controls (1: up, 0: none, -1: down)|Number|
+|Property|Description|Type|Can be used with use_events|
+|--------|-----------|----|---------------------------|
+|degree|Returns relative angel of head in degrees|Number|yes|
+|horizontal|Returns horizontal controls (1: left, 0: none, -1: right)|Number|no|
+|mouthOpen|Returns true if mouth open, else false|Boolean|no|
+|vertical|Returns vertical controls (1: up, 0: none, -1: down)|Number|no|
+
+<b>Events</b>
+
+|Event|Descripion|use_events argument is needed|
+|-----|----------|--------------------------|
+|"controllerloaded"|Gesture controller is loaded <br> and ready to use|no|
+|"up"|Head moves up|yes|
+|"down|Head moves down|yes|
+|"left"|Head moves left|yes|
+|"right"|Head moves right|yes|
+|"mouthopen"|Mouth is open|yes|
+|"mouthclosed"|Mouth is closed|yes|
 
 <b>Known issues</b>
 
