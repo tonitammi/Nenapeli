@@ -2,9 +2,13 @@ Gesture controlled game for tetraplegics
 
 ## Gesture Controller
 
-Watch [demo](nenapeli-b7576.web.app) 
+Watch [demo](nenapeli-b7576.web.app).
 
 <b>Example:</b>
+
+Download gesture-controller.js or install with npm:
+
+        npm install gesture-controller
 
 Import face-api.js and gesture-controller.js. Face-api.js should be imported first.
 
