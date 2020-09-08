@@ -96,6 +96,27 @@ You can stop gesture controller by calling:
 
     
     gestureController.stop()
+    
+<b>Use events example</b>
+
+        gestureController.on("left", function() {
+            console.log("left")
+        });
+        gestureController.on("right", function() {
+            console.log("right")
+        });
+        gestureController.on("up", function() {
+            console.log("up")
+        });
+        gestureController.on("down", function() {
+            console.log("down")
+        });
+        gestureController.on("mouthopen", function() {
+            console.log("mouthi s open")
+        });
+        gestureController.on("mouthclosed", function() {
+            console.log("mouth is closed")
+        });
 
 <b>Constructor parameters</b>
 
