@@ -6,7 +6,7 @@ const display = document.getElementById("display");
 const frame = document.getElementById("frame");
 const gameMenu = document.getElementById("game-menu");
 const gameDisplay = document.getElementById("close-game");
-let times = 0, interval;
+let times = 0, closed = true, interval;
 
 const gestureController = new GestureController(canvas, video, 10, true);
 
@@ -25,31 +25,33 @@ let drawing = false;
 
 gestureController.on("controllerloaded", function() {      
     game.init();
-    interval = setInterval(() => {
-        checkMouthOpens();
-    }, 800);
+    gestureController.on("mouthopen", () => {
+        if(closed) {
+            times++;
+            display.textContent = times;
+            closed = false;
+        }
+        if(times >= 2) { 
+            startGame();
+            return;
+        }
+    });
+    gestureController.on("mouthclosed", () => {
+        if(!closed) closed = true;
+    });
 });
 
-const checkMouthOpens = () => {
-    display.textContent = times;
-
-    if(gestureController.mouthOpen) {
-        times += 1;
-        display.textContent = times;
-    }
-    if(times >= 2) {
-        clearInterval(interval);
-        display.textContent = "Drawing starting..";
-        setTimeout(() => {
-            menu.style.display = "none";
-            game.init();
-            game.start();
-            drawing = true;
-            times = 0;
-            display.textContent = 0;
-            gameDisplay.textContent = 0;
-        }, 2000);
-    }
+const startGame = () => {
+    display.textContent = "Drawing starting..";
+    setTimeout(() => {
+        menu.style.display = "none";
+        game.init();
+        game.start();
+        drawing = true;
+        times = 0;
+        display.textContent = 0;
+        gameDisplay.textContent = 0;
+    }, 2000);
 }
 
 const game = {
@@ -131,8 +133,8 @@ gestureController.on("down", () => {
     draw();
 });
 gestureController.on("mouthopen", () => {
-    console.log("mouthopen");
-    endGame();
+    // console.log("mouthopen");
+    // endGame();
 });
 
 document.addEventListener('keydown', (event) => {
