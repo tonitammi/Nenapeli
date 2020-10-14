@@ -47,7 +47,6 @@ const addEndGameListener = () => {
         gestureController.on("mouthopen", () => {
             if(closed) {
                 times++;
-                display.textContent = times;
                 closed = false;
             }
             if(times >= 2) { 
