@@ -33,6 +33,7 @@ gestureController.on("controllerloaded", function() {
         }
         if(times >= 2) { 
             startGame();
+            addEndGameListener();
             return;
         }
     });
@@ -40,6 +41,22 @@ gestureController.on("controllerloaded", function() {
         if(!closed) closed = true;
     });
 });
+
+const addEndGameListener = () => {
+    gestureController.on("mouthopen", () => {
+        gestureController.on("mouthopen", () => {
+            if(closed) {
+                times++;
+                display.textContent = times;
+                closed = false;
+            }
+            if(times >= 2) { 
+                endGame();
+                return;
+            }
+        });
+    });
+}
 
 const startGame = () => {
     display.textContent = "Drawing starting..";
@@ -132,10 +149,10 @@ gestureController.on("down", () => {
     lastY += moveAmount;
     draw();
 });
-gestureController.on("mouthopen", () => {
-    // console.log("mouthopen");
-    // endGame();
-});
+// gestureController.on("mouthopen", () => {
+//     console.log("mouthopen");
+//     endGame();
+// });
 
 document.addEventListener('keydown', (event) => {
     if (event.key === "ArrowLeft") {
