@@ -44,16 +44,17 @@ gestureController.on("controllerloaded", function() {
 
 const addEndGameListener = () => {
     gestureController.on("mouthopen", () => {
-        gestureController.on("mouthopen", () => {
-            if(closed) {
-                times++;
-                closed = false;
-            }
-            if(times >= 2) { 
-                endGame();
-                return;
-            }
-        });
+        if(closed) {
+            times++;
+            closed = false;
+        }
+        if(times >= 2) { 
+            endGame();
+            return;
+        }
+    });
+    gestureController.on("mouthclosed", () => {
+        if(!closed) closed = true;
     });
 }
 
